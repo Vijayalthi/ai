@@ -1,0 +1,341 @@
+#dfs
+def dfs(graph, start):
+    visited = set()
+    stack = [start]
+    while stack:
+        node = stack.pop() 
+        if node not in visited:
+            print(node, end=" ")
+            visited.add(node)
+            stack.extend(reversed(graph[node]))
+graph = {
+    'A': ['B', 'C'],
+    'B': ['A', 'D', 'E'],
+    'C': ['A', 'F', 'G'],
+    'D': ['B'],
+    'E': ['B'],
+    'F': ['C'],
+    'G': ['C']
+}
+print("Traversal : ")
+dfs(graph,'A')
+
+
+
+
+
+
+
+
+
+
+#bfs
+from collections import deque
+
+def bfs(graph,start):
+    visited = set()
+    queue = deque([start])
+    while queue:
+        node = queue.popleft()
+        if node not in visited : 
+            print(node, end=" ")
+            visited.add(node)
+            queue.extend(graph[node])
+graph = {
+    'A': ['B', 'C'],
+    'B': ['A', 'D', 'E'],
+    'C': ['A', 'F', 'G'],
+    'D': ['B'],
+    'E': ['B'],
+    'F': ['C'],
+    'G': ['C']
+}
+print("Traversal : ")
+bfs(graph,'A')
+
+
+
+
+
+
+
+
+#ucs
+import heapq
+def uniform_cost_search(graph,start,goal):
+    priority_queue = [(0,start,[start])]
+    visited = set()
+    while priority_queue:
+        cost, current, path = heapq.heappop(priority_queue)
+        if(current==goal):
+            return path,cost
+        if(current in visited):
+            continue
+        visited.add(current)
+        for neighbor, neighbor_cost in graph[current].items():
+            new_path = path + [neighbor]
+            new_cost = cost + neighbor_cost
+            heapq.heappush(priority_queue,(new_cost,neighbor,new_path))
+    return None,None
+graph = {
+    'A' : {'B':2, 'C':5},
+    'B' : {'A':2, 'C':1, 'D':3, 'E':4},
+    'C' : {'A':5, 'B':1, 'E':8, 'F':7},
+    'D' : {'B':3, 'E':6},
+    'E' : {'B':4, 'C':8, 'D':6, 'F':3},
+    'F' : {'C':7, 'E':3}
+}
+start_node = 'A'
+goal_node = 'E'
+path, cost = uniform_cost_search(graph,start_node,goal_node)
+if path:
+    print("Shortest path : ", path)
+    print("Cost : ", cost)
+else:
+    print("No path found")
+
+#water_jug
+from collections import deque
+import heapq
+
+def water_jug_dfs(a,b,d):
+    stack = [(0,0,[])]
+    visited = set()
+
+    while stack:
+        x,y,path = stack.pop()
+        if(x,y) in visited:
+            continue
+        visited.add((x,y))
+        if x==d or y==d:
+            return path
+        if(a,y) not in visited:
+            stack.append((a,y,path + ["Fill jug A"]))
+        if(x,b) not in visited:
+            stack.append((x,b,path + ["Fill jug B"]))
+        if(0,y) not in visited:
+            stack.append((0,y,path + ["Empty jug A"]))
+        if(x,0) not in visited:
+            stack.append((x,0,path + ["Empty jug B"]))
+        pour_amount = min(x,b-y)
+        if(x-pour_amount,y+pour_amount) not in visited:
+            stack.append((x-pour_amount,y+pour_amount, path + ["Pour jug A to jug B"]))
+        pour_amount = min(a-x,y)
+        if(x+pour_amount,y-pour_amount) not in visited:
+            stack.append((x+pour_amount,y-pour_amount, path + ["Pour jug B to jug A"]))
+    return None
+
+def water_jug_bfs(a,b,d):
+    queue = deque([(0,0,[])])
+    visited = set()
+
+    while queue:
+        x,y,path = queue.popleft()
+        if(x,y) in visited:
+            continue
+        visited.add((x,y))
+        if x==d or y==d:
+            return path
+        if(a,y) not in visited:
+            queue.append((a,y,path + ["Fill jug A"]))
+        if(x,b) not in visited:
+            queue.append((x,b,path + ["Fill jug B"]))
+        if(0,y) not in visited:
+            queue.append((0,y,path + ["Empty jug A"]))
+        if(x,0) not in visited:
+            queue.append((x,0,path + ["Empty jug B"]))
+        pour_amount = min(x,b-y)
+        if(x-pour_amount,y+pour_amount) not in visited:
+            queue.append((x-pour_amount,y+pour_amount,path + ["Pour jug A to jug B"]))
+        pour_amount = min(a-x,y)
+        if(x+pour_amount,y-pour_amount) not in visited:
+            queue.append((x+pour_amount,y-pour_amount,path + ["Pour jug B to jug A"]))
+    return None
+
+def water_jug_ucs(a,b,d):
+    heap = [(0,0,0,[])]
+    visited = set()
+
+    while heap:
+        cost,x,y,path = heapq.heappop(heap)
+        if(x,y) in visited:
+            continue
+        visited.add((x,y))
+        if x==d or y==d:
+            return path
+        if(a,y) not in visited:
+            heapq.heappush(heap,(cost+1,a,y,path+["Fill jug A"]))
+        if(x,b) not in visited:
+            heapq.heappush(heap,(cost+1,x,b,path+["Fill jug B"]))
+        if(0,y) not in visited:
+            heapq.heappush(heap,(cost+1,0,y,path+["Empty jug A"]))
+        if(x,0) not in visited:
+            heapq.heappush(heap,(cost+1,x,0,path+["Empty jug B"]))
+        pour_amount = min(x,b-y)
+        if(x-pour_amount,y+pour_amount) not in visited:
+            heapq.heappush(heap,(cost+1,x-pour_amount,y+pour_amount,path+["Pour jug A to jug B"]))
+        pour_amount = min(a-x,y)
+        if(x+pour_amount,y-pour_amount) not in visited:
+            heapq.heappush(heap,(cost+1,x+pour_amount,y-pour_amount,path+["Pour jug B to jug A"]))
+    return None
+
+a = int(input("Enter capacity of jug A : "))
+b = int(input("Enter capacity of jug B : "))
+d = int(input("Enter the target amount of water : "))
+
+print("DFS Solution : ",water_jug_dfs(a,b,d))
+print("BFS Solution : ",water_jug_bfs(a,b,d))
+print("UCS Solution : ",water_jug_ucs(a,b,d))
+
+
+
+
+
+#a*
+import heapq
+
+def a_star(start, goal, graph, heuristic):
+    open = []
+    heapq.heappush(open,(heuristic[start],0,start))
+
+    closed = set()
+    g_values = {start : 0}
+    parent = {start : None}
+
+    while open:
+        current_f, current_g, current_node = heapq.heappop(open)
+
+        if current_node==goal:
+            path=[]
+            while current_node is not None:
+                path.append(current_node)
+                current_node = parent[current_node]
+            return path[::-1]
+        closed.add(current_node)
+
+        for neighbor, cost in graph[current_node].items():
+            if neighbor in closed:
+                continue
+
+            tentative_g = current_g + cost
+            if neighbor not in g_values or tentative_g < g_values[neighbor]:
+                g_values[neighbor] = tentative_g
+                f = tentative_g + heuristic[neighbor]
+                heapq.heappush(open,(f,tentative_g,neighbor))
+                parent[neighbor] = current_node
+    return None
+
+# Example Graph
+graph = {
+    'A': {'B': 1, 'C': 4},
+    'B': {'A': 1, 'C': 2, 'D': 5},
+    'C': {'A': 4, 'B': 2, 'D': 1},
+    'D': {'B': 5, 'C': 1, 'E': 3},
+    'E': {'D': 3}
+}
+
+# Heuristic values (Manhattan or Euclidean estimate to goal)
+heuristic = {
+    'A': 7, 'B': 6, 'C': 2, 'D': 1, 'E': 0
+}
+
+# Running A* Search from A to E
+start_node = 'A'
+goal_node = 'E'
+path = a_star(start_node, goal_node, graph, heuristic)
+
+print("A* Path:", path)
+
+#travelling
+import random
+
+def random_solution(tsp):
+    cities = list(range(len(tsp)))
+    random.shuffle(cities)
+    return cities
+
+def getCost(tsp, solution):
+    cost = 0
+    for i in range(len(solution)-1):
+        cost += tsp[solution[i]][solution[i+1]]
+    cost += tsp[solution[-1]][solution[0]]
+    return cost
+
+def getNeighbors(solution):
+    neighbors = []
+    for i in range(len(solution)-1):
+        for j in range(i+1,len(solution)):
+            dummyneighbor = solution.copy()
+            dummyneighbor[i], dummyneighbor[j] = solution[j], solution[i]
+            neighbors.append(dummyneighbor)
+    return neighbors
+
+def bestPath(tsp, neighbors):
+    bestNeighbor = neighbors[0]
+    bestNeighborCost = getCost(tsp,bestNeighbor)
+
+    for neighbor in neighbors:
+        currentNeighborCost = getCost(tsp,neighbor)
+        if currentNeighborCost<bestNeighborCost:
+            bestNeighborCost = currentNeighborCost
+            bestNeighbor = neighbor
+    return bestNeighbor,bestNeighborCost
+
+def hillClimbing(tsp):
+    currentSolution = random_solution(tsp)
+    currentCost = getCost(tsp,currentSolution)
+
+    while True:
+        currentNeighbors = getNeighbors(currentSolution)
+        bestNeighbor, bestCost = bestPath(tsp, currentNeighbors)
+
+        if bestCost>= currentCost:
+            break
+        currentSolution = bestNeighbor
+        currentCost = bestCost
+    return currentSolution, currentCost
+
+tsp = [
+    [0,20,10,15],
+    [20,0,15,11],
+    [10,15,0,17],
+    [15,11,17,0]
+]
+
+path, cost = hillClimbing(tsp)
+print(f'Optimized path : {path}')
+print(f'Optimized cost : {cost}')
+
+#model checking
+Import itertools
+
+N=int(input(‘Enter no of variables : ‘))
+Temp=False
+Possibilities = list(itertools.product([True,False],repeat=n))
+If n==3:
+    For I in range(len(possibilities)):
+        A=possibilities[i][0]
+        B=possibilities[i][1]
+        C=possibilities[i][2]
+        Condition1=A or B
+        Condition2=(not A) == (not B or C)
+        Condition3=not A or not B or C
+        If condition1 and condition2 and condition3:
+            Temp=True
+            Print(f’A={A},B={B},C={C}’)
+Elif n==4:
+    For I in range(len(possibilities)):
+        A=possibilities[i][0]
+        B=possibilities[i][1]
+        C=possibilities[i][2]
+        D=possibilities[i][3]
+        Condition1=C == (B or D)
+        Condition2=(not A) or (not B and not D)
+        Condition3=(B and not C) or A
+        Condition4=D or C
+        If condition1 and condition2 and condition3 and condition4:
+            Temp=True
+            Print(f’A={A},B={B},C={C},D={D}’)
+If temp==False:
+    Print(‘No assignment possible’)
+
